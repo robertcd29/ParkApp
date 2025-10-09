@@ -1,16 +1,63 @@
 let titleEl = document.getElementById("title");
 let descEl = document.getElementById("description");
 let sidebar = document.getElementById("sidebar");
+let statusBadge = document.getElementById("statusBadge");
+let closeBtn = document.getElementById("closeBtn");
+let directionsBtn = document.getElementById("directionsBtn");
+let reserveBtn = document.getElementById("reserveBtn");
 
-function setupZoneClickListener(zone, title, description) {
+function setupZoneClickListener(zone, title, status) {
     zone.addListener("click", () => {
         titleEl.textContent = title;
-        descEl.innerHTML = description;
-        sidebar.style.display = "block";
+        statusBadge.textContent = status;
+        
+        statusBadge.className = 'popup-badge';
+        if (status.toLowerCase() === 'deschis') {
+            statusBadge.classList.add('deschis');
+        } else if (status.toLowerCase() === 'complet') {
+            statusBadge.classList.add('complet');
+        }
+        
+        descEl.innerHTML = `<span class="status ${status.toLowerCase().replace(' ', '-')}">${status}</span>`;
+        
+        sidebar.classList.add("show");
+        document.getElementById('map').classList.add('shrink');
+        
+        setTimeout(() => {
+            google.maps.event.trigger(map, 'resize');
+        }, 400);
     });
 }
 
-function initZone(map){
+function closePanel() {
+    sidebar.classList.remove("show");
+    document.getElementById('map').classList.remove('shrink');
+    
+    setTimeout(() => {
+        google.maps.event.trigger(map, 'resize');
+    }, 400);
+}
+
+closeBtn.onclick = closePanel;
+
+directionsBtn.onclick = () => {
+    const zoneName = titleEl.textContent;
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(zoneName + ', Timișoara')}`, '_blank');
+};
+
+reserveBtn.onclick = () => {
+    alert(`Rezervare în lucru pentru: ${titleEl.textContent}`);
+};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sidebar.classList.contains('show')) {
+        closePanel();
+    }
+});
+
+function initZone(mapInstance){
+    map = mapInstance; 
+    
     const coord_zona_Hidrotehnica1 = [
         { lat: 45.749114, lng: 21.226676 },
         { lat: 45.749185, lng: 21.226690 },
@@ -122,7 +169,7 @@ function initZone(map){
     ];
 
     const BegaCentral = new google.maps.Polygon ({
-        path: coord_BegaCentral,
+        paths: coord_BegaCentral,
         strokeColor: "#FF0000",
         strokeOpacity: 0.8,
         strokeWeight: 2,
@@ -141,7 +188,7 @@ function initZone(map){
     ];
 
     const zona_Judecatorie = new google.maps.Polygon ({
-        path: coord_zona_Judecatorie,
+        paths: coord_zona_Judecatorie,
         strokeColor: "#FF0000",
         strokeOpacity: 0.8,
         strokeWeight: 2,
@@ -165,7 +212,7 @@ function initZone(map){
     ];
 
     const zona_ConventionCenter1 = new google.maps.Polygon ({
-        path: coord_zona_ConventionCenter1,
+        paths: coord_zona_ConventionCenter1,
         strokeColor: "#FF0000",
         strokeOpacity: 0.8,
         strokeWeight: 2,
@@ -188,7 +235,7 @@ function initZone(map){
     ];
 
     const zona_ConventionCenter2 = new google.maps.Polygon ({
-        path: coord_zona_ConventionCenter2,
+        paths: coord_zona_ConventionCenter2,
         strokeColor: "#FF0000",
         strokeOpacity: 0.8,
         strokeWeight: 2,
@@ -214,7 +261,7 @@ function initZone(map){
     ];
 
     const BdMihaiEminescu1 = new google.maps.Polygon ({
-        path: coord_BdMihaiEminescu1,
+        paths: coord_BdMihaiEminescu1,
         strokeColor: "#fcd703",
         strokeOpacity: 0.8,
         strokeWeight: 2,
@@ -231,7 +278,7 @@ function initZone(map){
     ];
 
     const StrGheorgheAndrasiu = new google.maps.Polygon ({
-        path: coord_StrGheorgheAndrasiu,
+        paths: coord_StrGheorgheAndrasiu,
         strokeColor: "#fcd703",
         strokeOpacity: 0.65,
         strokeWeight: 5,
@@ -248,7 +295,7 @@ function initZone(map){
     ];
 
     const StrPatriarhMironCristea = new google.maps.Polygon ({
-        path: coord_StrPatriarhMironCristea,
+        paths: coord_StrPatriarhMironCristea,
         strokeColor: "#fcd703",
         strokeOpacity: 0.65,
         strokeWeight: 5,
@@ -264,10 +311,8 @@ function initZone(map){
         { lat: 45.752427, lng: 21.229435 }
     ];
 
-    console.log(coord_StrMaximilianRobespierre);
-
     const StrMaximilianRobespierre = new google.maps.Polygon ({
-        path: coord_StrMaximilianRobespierre,
+        paths: coord_StrMaximilianRobespierre,
         strokeColor: "#fcd703",
         strokeOpacity: 0.65,
         strokeWeight: 5,
@@ -277,6 +322,4 @@ function initZone(map){
 
    StrMaximilianRobespierre.setMap(map);
     setupZoneClickListener(StrMaximilianRobespierre, "Strada Maximilian Robespierre", "In lucru");
-
-
 }
